@@ -6,7 +6,7 @@ export default defineConfig({
     target: 'esnext',
     // minify: false,
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: resolve(__dirname, 'src/index.js'),
       name: 'PetiteVue',
       formats: ['es', 'umd', 'iife']
     },

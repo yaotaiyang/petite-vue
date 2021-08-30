@@ -1,16 +1,15 @@
-import { isArray, isObject } from '@vue/shared'
+import { isArray, isObject } from '../utils'
 import { Block } from '../block'
 import { evaluate } from '../eval'
-import { Context, createScopedContext } from '../context'
+import { createScopedContext } from '../context'
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
 const stripParensRE = /^\(|\)$/g
 const destructureRE = /^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/
 
-type KeyToIndexMap = Map<any, number>
 
-export const _for = (el: Element, exp: string, ctx: Context) => {
+export const _for = (el, exp, ctx) => {
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) {
     import.meta.env.DEV && console.warn(`invalid v-for expression: ${exp}`)
@@ -19,17 +18,17 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
 
   const nextNode = el.nextSibling
 
-  const parent = el.parentElement!
+  const parent = el.parentElement
   const anchor = new Text('')
   parent.insertBefore(anchor, el)
   parent.removeChild(el)
 
   const sourceExp = inMatch[2].trim()
   let valueExp = inMatch[1].trim().replace(stripParensRE, '').trim()
-  let destructureBindings: string[] | undefined
+  let destructureBindings
   let isArrayDestructure = false
-  let indexExp: string | undefined
-  let objIndexExp: string | undefined
+  let indexExp
+  let objIndexExp
 
   let keyAttr = 'key'
   let keyExp =
@@ -56,13 +55,13 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
   }
 
   let mounted = false
-  let blocks: Block[]
-  let childCtxs: Context[]
-  let keyToIndexMap: Map<any, number>
+  let blocks
+  let childCtxs
+  let keyToIndexMap
 
-  const createChildContexts = (source: unknown): [Context[], KeyToIndexMap] => {
-    const map: KeyToIndexMap = new Map()
-    const ctxs: Context[] = []
+  const createChildContexts = (source) => {
+    const map = new Map()
+    const ctxs = []
 
     if (isArray(source)) {
       for (let i = 0; i < source.length; i++) {
@@ -83,12 +82,12 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
   }
 
   const createChildContext = (
-    map: KeyToIndexMap,
-    value: any,
-    index: number,
-    objKey?: string
-  ): Context => {
-    const data: any = {}
+    map,
+    value,
+    index,
+    objKey
+  ) => {
+    const data = {}
     if (destructureBindings) {
       destructureBindings.forEach(
         (b, i) => (data[b] = value[isArrayDestructure ? i : b])
@@ -109,7 +108,7 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
     return childCtx
   }
 
-  const mountBlock = (ctx: Context, ref: Node) => {
+  const mountBlock = (ctx, ref) => {
     const block = new Block(el, ctx)
     block.key = ctx.key
     block.insert(parent, ref)
@@ -117,6 +116,7 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
   }
 
   ctx.effect(() => {
+    console.log('v-for')
     const source = evaluate(ctx.scope, sourceExp)
     const prevKeyToIndexMap = keyToIndexMap
     ;[childCtxs, keyToIndexMap] = createChildContexts(source)
@@ -124,7 +124,7 @@ export const _for = (el: Element, exp: string, ctx: Context) => {
       blocks = childCtxs.map((s) => mountBlock(s, anchor))
       mounted = true
     } else {
-      const nextBlocks: Block[] = []
+      const nextBlocks = []
       for (let i = 0; i < blocks.length; i++) {
         if (!keyToIndexMap.has(blocks[i].key)) {
           blocks[i].remove()

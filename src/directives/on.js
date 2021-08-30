@@ -1,5 +1,4 @@
-import { Directive } from '.'
-import { hyphenate } from '@vue/shared'
+import { hyphenate } from '../utils'
 import { listen } from '../utils'
 import { nextTick } from '../scheduler'
 
@@ -9,27 +8,24 @@ const simplePathRE =
 
 const systemModifiers = ['ctrl', 'shift', 'alt', 'meta']
 
-type KeyedEvent = KeyboardEvent | MouseEvent | TouchEvent
 
-const modifierGuards: Record<
-  string,
-  (e: Event, modifiers: Record<string, true>) => void | boolean
-> = {
+const modifierGuards = {
   stop: (e) => e.stopPropagation(),
   prevent: (e) => e.preventDefault(),
   self: (e) => e.target !== e.currentTarget,
-  ctrl: (e) => !(e as KeyedEvent).ctrlKey,
-  shift: (e) => !(e as KeyedEvent).shiftKey,
-  alt: (e) => !(e as KeyedEvent).altKey,
-  meta: (e) => !(e as KeyedEvent).metaKey,
-  left: (e) => 'button' in e && (e as MouseEvent).button !== 0,
-  middle: (e) => 'button' in e && (e as MouseEvent).button !== 1,
-  right: (e) => 'button' in e && (e as MouseEvent).button !== 2,
+  ctrl: (e) => !(e).ctrlKey,
+  shift: (e) => !(e).shiftKey,
+  alt: (e) => !(e).altKey,
+  meta: (e) => !(e).metaKey,
+  left: (e) => 'button' in e && (e).button !== 0,
+  middle: (e) => 'button' in e && (e).button !== 1,
+  right: (e) => 'button' in e && (e).button !== 2,
   exact: (e, modifiers) =>
-    systemModifiers.some((m) => (e as any)[`${m}Key`] && !modifiers[m])
+    systemModifiers.some((m) => (e)[`${m}Key`] && !modifiers[m])
 }
 
-export const on: Directive = ({ el, get, exp, arg, modifiers }) => {
+export const on = ({ el, get, exp, arg, modifiers }) => {
+  
   if (!arg) {
     if (import.meta.env.DEV) {
       console.error(`v-on="obj" syntax is not supported in petite-vue.`)
@@ -57,8 +53,8 @@ export const on: Directive = ({ el, get, exp, arg, modifiers }) => {
     }
 
     const raw = handler
-    handler = (e: Event) => {
-      if ('key' in e && !(hyphenate((e as KeyboardEvent).key) in modifiers)) {
+    handler = (e) => {
+      if ('key' in e && !(hyphenate((e).key) in modifiers)) {
         return
       }
       for (const key in modifiers) {
@@ -70,6 +66,6 @@ export const on: Directive = ({ el, get, exp, arg, modifiers }) => {
       return raw(e)
     }
   }
-
+  console.log(arg,modifiers)
   listen(el, arg, handler, modifiers)
 }

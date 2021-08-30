@@ -1,33 +1,31 @@
-import { Context, createContext } from './context'
+import {  createContext } from './context'
 import { walk } from './walk'
-import { remove } from '@vue/shared'
-import { stop } from '@vue/reactivity'
+import { remove } from './utils'
+import { stop } from './reactive'
 
 export class Block {
-  template: Element | DocumentFragment
-  ctx: Context
-  key?: any
-  parentCtx?: Context
-
-  isFragment: boolean
-  start?: Text
-  end?: Text
-
+  template
+  ctx
+  key
+  parentCtx
+  isFragment
+  start
+  end
   get el() {
-    return this.start || (this.template as Element)
+    return this.start || (this.template)
   }
 
-  constructor(template: Element, parentCtx: Context, isRoot = false) {
+  constructor(template, parentCtx, isRoot = false) {
     this.isFragment = template instanceof HTMLTemplateElement
 
     if (isRoot) {
       this.template = template
     } else if (this.isFragment) {
-      this.template = (template as HTMLTemplateElement).content.cloneNode(
+      this.template = (template).content.cloneNode(
         true
-      ) as DocumentFragment
+      ) 
     } else {
-      this.template = template.cloneNode(true) as Element
+      this.template = template.cloneNode(true)
     }
 
     if (isRoot) {
@@ -42,12 +40,12 @@ export class Block {
     walk(this.template, this.ctx)
   }
 
-  insert(parent: Element, anchor: Node | null = null) {
+  insert(parent, anchor) {
     if (this.isFragment) {
       if (this.start) {
         // already inserted, moving
-        let node: Node | null = this.start
-        let next: Node | null
+        let node = this.start
+        let next
         while (node) {
           next = node.nextSibling
           parent.insertBefore(node, anchor)
@@ -71,9 +69,9 @@ export class Block {
       remove(this.parentCtx.blocks, this)
     }
     if (this.start) {
-      const parent = this.start.parentNode!
-      let node: Node | null = this.start
-      let next: Node | null
+      const parent = this.start.parentNode
+      let node= this.start
+      let next 
       while (node) {
         next = node.nextSibling
         parent.removeChild(node)
@@ -81,7 +79,7 @@ export class Block {
         node = next
       }
     } else {
-      this.template.parentNode!.removeChild(this.template)
+      this.template.parentNode.removeChild(this.template)
     }
     this.teardown()
   }

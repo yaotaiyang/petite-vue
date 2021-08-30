@@ -1,23 +1,23 @@
-import { Directive } from '.'
 import {
   normalizeClass,
   normalizeStyle,
   isString,
   isArray,
   hyphenate,
-  camelize
-} from '@vue/shared'
+} from '../utils'
 
 const forceAttrRE = /^(spellcheck|draggable|form|list|type)$/
-
-export const bind: Directive<Element & { _class?: string }> = ({
+const camelizeRE = /-(\w)/g
+const camelize = str => str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''))
+const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
+export const bind = ({
   el,
   get,
   effect,
   arg,
   modifiers
 }) => {
-  let prevValue: any
+  let prevValue
 
   // record static class
   if (arg === 'class') {
@@ -46,10 +46,10 @@ export const bind: Directive<Element & { _class?: string }> = ({
 }
 
 const setProp = (
-  el: Element & { _class?: string },
-  key: string,
-  value: any,
-  prevValue?: any
+  el,
+  key,
+  value,
+  prevValue
 ) => {
   if (key === 'class') {
     el.setAttribute(
@@ -58,7 +58,7 @@ const setProp = (
     )
   } else if (key === 'style') {
     value = normalizeStyle(value)
-    const { style } = el as HTMLElement
+    const { style } = el
     if (!value) {
       el.removeAttribute('style')
     } else if (isString(value)) {
@@ -92,9 +92,9 @@ const setProp = (
     // store value as dom properties since non-string values will be
     // stringified.
     if (key === 'true-value') {
-      ;(el as any)._trueValue = value
+      ;(el)._trueValue = value
     } else if (key === 'false-value') {
-      ;(el as any)._falseValue = value
+      ;(el)._falseValue = value
     } else if (value != null) {
       el.setAttribute(key, value)
     } else {
@@ -106,9 +106,9 @@ const setProp = (
 const importantRE = /\s*!important$/
 
 const setStyle = (
-  style: CSSStyleDeclaration,
-  name: string,
-  val: string | string[]
+  style,
+  name,
+  val
 ) => {
   if (isArray(val)) {
     val.forEach((v) => setStyle(style, name, v))
@@ -125,7 +125,7 @@ const setStyle = (
           'important'
         )
       } else {
-        style[name as any] = val
+        style[name] = val
       }
     }
   }

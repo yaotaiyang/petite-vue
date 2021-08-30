@@ -1,21 +1,10 @@
-import { effect as rawEffect, reactive, ReactiveEffect } from '@vue/reactivity'
-import { Block } from './block'
-import { Directive } from './directives'
+import { effect as rawEffect, reactive } from './reactive'
 import { queueJob } from './scheduler'
 import { inOnce } from './walk'
 
-export interface Context {
-  key?: any
-  scope: Record<string, any>
-  dirs: Record<string, Directive>
-  blocks: Block[]
-  effect: typeof rawEffect
-  effects: ReactiveEffect[]
-  cleanups: (() => void)[]
-}
 
-export const createContext = (parent?: Context): Context => {
-  const ctx: Context = {
+export const createContext = (parent) => {
+  const ctx = {
     ...parent,
     scope: parent ? parent.scope : reactive({}),
     dirs: parent ? parent.dirs : {},
@@ -25,10 +14,10 @@ export const createContext = (parent?: Context): Context => {
     effect: (fn) => {
       if (inOnce) {
         queueJob(fn)
-        return fn as any
+        return fn 
       }
-      const e: ReactiveEffect = rawEffect(fn, {
-        scheduler: () => queueJob(e)
+      const e = rawEffect(fn, {
+        scheduler: () => queueJob(fn)
       })
       ctx.effects.push(e)
       return e
@@ -37,7 +26,7 @@ export const createContext = (parent?: Context): Context => {
   return ctx
 }
 
-export const createScopedContext = (ctx: Context, data = {}): Context => {
+export const createScopedContext = (ctx, data = {}) => {
   const parentScope = ctx.scope
   const mergedScope = Object.create(parentScope)
   Object.defineProperties(mergedScope, Object.getOwnPropertyDescriptors(data))

@@ -1,23 +1,18 @@
 import { Block } from '../block'
 import { evaluate } from '../eval'
 import { checkAttr } from '../utils'
-import { Context } from '../context'
 
-interface Branch {
-  exp?: string | null
-  el: Element
-}
-
-export const _if = (el: Element, exp: string, ctx: Context) => {
+export const _if = (el, exp, ctx) => {
   if (import.meta.env.DEV && !exp.trim()) {
     console.warn(`v-if expression cannot be empty.`)
   }
 
-  const parent = el.parentElement!
+  const parent = el.parentElement
   const anchor = new Comment('v-if')
-  parent.insertBefore(anchor, el)
+  parent.insertBefore(anchor, el) // newItem,existingItem
 
-  const branches: Branch[] = [
+  //存储其他条件分支
+  const branches = [
     {
       exp,
       el
@@ -25,8 +20,9 @@ export const _if = (el: Element, exp: string, ctx: Context) => {
   ]
 
   // locate else branch
-  let elseEl: Element | null
-  let elseExp: string | null
+  let elseEl
+  let elseExp
+  // 全部移除
   while ((elseEl = el.nextElementSibling)) {
     elseExp = null
     if (
@@ -43,8 +39,8 @@ export const _if = (el: Element, exp: string, ctx: Context) => {
   const nextNode = el.nextSibling
   parent.removeChild(el)
 
-  let block: Block | undefined
-  let activeBranchIndex: number = -1
+  let block
+  let activeBranchIndex = -1
 
   const removeActiveBlock = () => {
     if (block) {

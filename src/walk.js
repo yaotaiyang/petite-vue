@@ -1,4 +1,4 @@
-import { builtInDirectives, Directive } from './directives'
+import { builtInDirectives } from './directives'
 import { _if } from './directives/if'
 import { _for } from './directives/for'
 import { bind } from './directives/bind'
@@ -7,7 +7,7 @@ import { text } from './directives/text'
 import { evaluate } from './eval'
 import { checkAttr } from './utils'
 import { ref } from './directives/ref'
-import { Context, createScopedContext } from './context'
+import {  createScopedContext } from './context'
 
 const dirRE = /^(?:v-|:|@)/
 const modifierRE = /\.([\w-]+)/g
@@ -15,16 +15,16 @@ const interpolationRE = /\{\{([^]+?)\}\}/g
 
 export let inOnce = false
 
-export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
+export const walk = (node, ctx) => {
   const type = node.nodeType
   if (type === 1) {
     // Element
-    const el = node as Element
+    const el = node 
     if (el.hasAttribute('v-pre')) {
       return
     }
 
-    let exp: string | null
+    let exp
 
     // v-if
     if ((exp = checkAttr(el, 'v-if'))) {
@@ -81,9 +81,9 @@ export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
     }
   } else if (type === 3) {
     // Text
-    const data = (node as Text).data
+    const data = (node).data
     if (data.includes('{{')) {
-      let segments: string[] = []
+      let segments = []
       let lastIndex = 0
       let match
       while ((match = interpolationRE.exec(data))) {
@@ -98,11 +98,11 @@ export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
       applyDirective(node, text, segments.join('+'), ctx)
     }
   } else if (type === 11) {
-    walkChildren(node as DocumentFragment, ctx)
+    walkChildren(node, ctx)
   }
 }
 
-const walkChildren = (node: Element | DocumentFragment, ctx: Context) => {
+const walkChildren = (node, ctx) => {
   let child = node.firstChild
   while (child) {
     child = walk(child, ctx) || child.nextSibling
@@ -110,17 +110,17 @@ const walkChildren = (node: Element | DocumentFragment, ctx: Context) => {
 }
 
 const processDirective = (
-  el: Element,
-  raw: string,
-  exp: string,
-  ctx: Context
+  el,
+  raw,
+  exp,
+  ctx
 ) => {
-  let dir: Directive
-  let arg: string | undefined
-  let modifiers: Record<string, true> | undefined
+  let dir
+  let arg
+  let modifiers
 
   // modifiers
-  let modMatch: RegExpExecArray | null = null
+  let modMatch
   while ((modMatch = modifierRE.exec(raw))) {
     ;(modifiers || (modifiers = {}))[modMatch[1]] = true
     raw = raw.slice(0, modMatch.index)
@@ -148,12 +148,12 @@ const processDirective = (
 }
 
 const applyDirective = (
-  el: Node,
-  dir: Directive<any>,
-  exp: string,
-  ctx: Context,
-  arg?: string,
-  modifiers?: Record<string, true>
+  el,
+  dir,
+  exp,
+  ctx,
+  arg,
+  modifiers
 ) => {
   const get = (e = exp) => evaluate(ctx.scope, e, el)
   const cleanup = dir({
@@ -170,7 +170,7 @@ const applyDirective = (
   }
 }
 
-const resolveTemplate = (el: Element, template: string) => {
+const resolveTemplate = (el, template) => {
   if (template[0] === '#') {
     const templateEl = document.querySelector(template)
     if (import.meta.env.DEV && !templateEl) {
@@ -178,7 +178,7 @@ const resolveTemplate = (el: Element, template: string) => {
         `template selector ${template} has no matching <template> element.`
       )
     }
-    el.appendChild((templateEl as HTMLTemplateElement).content.cloneNode(true))
+    el.appendChild((templateEl).content.cloneNode(true))
     return
   }
   el.innerHTML = template

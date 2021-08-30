@@ -1,11 +1,10 @@
-import { reactive } from '@vue/reactivity'
+import { reactive } from './reactive'
 import { Block } from './block'
-import { Directive } from './directives'
 import { createContext } from './context'
 import { toDisplayString } from './directives/text'
 import { nextTick } from './scheduler'
 
-export const createApp = (initialData?: any) => {
+export const createApp = (initialData) => {
   // root context
   const ctx = createContext()
   if (initialData) {
@@ -17,10 +16,10 @@ export const createApp = (initialData?: any) => {
   ctx.scope.$nextTick = nextTick
   ctx.scope.$refs = Object.create(null)
 
-  let rootBlocks: Block[]
+  let rootBlocks=[]
 
   return {
-    directive(name: string, def?: Directive) {
+    directive(name, def) {
       if (def) {
         ctx.dirs[name] = def
         return this
@@ -29,7 +28,7 @@ export const createApp = (initialData?: any) => {
       }
     },
 
-    mount(el?: string | Element | null) {
+    mount(el) {
       if (typeof el === 'string') {
         el = document.querySelector(el)
         if (!el) {
@@ -40,7 +39,7 @@ export const createApp = (initialData?: any) => {
       }
 
       el = el || document.documentElement
-      let roots: Element[]
+      let roots=[]
       if (el.hasAttribute('v-scope')) {
         roots = [el]
       } else {

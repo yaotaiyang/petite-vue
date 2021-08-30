@@ -1,6 +1,6 @@
-import { Directive } from '.'
 
-export const ref: Directive = ({
+
+export const ref = ({
   el,
   ctx: {
     scope: { $refs }
@@ -8,7 +8,7 @@ export const ref: Directive = ({
   get,
   effect
 }) => {
-  let prevRef: any
+  let prevRef
   effect(() => {
     const ref = get()
     $refs[ref] = el

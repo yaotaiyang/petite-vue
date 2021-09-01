@@ -2,7 +2,7 @@ import { isObject } from "./utils";
 import { effect,track,trigger } from "./effect";
 const reactiveMap = new WeakMap();
 const mutableHandlers = {
-  get:function(target, key, receiver){
+  get:function(target, key, receiver){ // receiver是proxy实例
     const res = Reflect.get(target, key, receiver);
     if (isObject(res)) {
       // 把内部所有的是 object 的值都用 reactive 包裹，变成响应式对象
@@ -14,7 +14,7 @@ const mutableHandlers = {
     track(target, "get", key);
     return res;
   },
-  set:function(target, key, value, receiver){
+  set:function(target, key, value,receiver){
     const result = Reflect.set(target, key, value, receiver);
     // 在触发 set 的时候进行触发依赖
     trigger(target, "get", key);

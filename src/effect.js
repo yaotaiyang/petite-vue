@@ -121,69 +121,15 @@ function triggerEffects(dep, debuggerEventExtraInfo) {
         return;
     }
     let deps = [];
-    if (type === "clear" /* CLEAR */) {
-        // collection being cleared
-        // trigger all effects for target
-        deps = [...depsMap.values()];
+    if(key!==undefined){
+        deps.push(depsMap.get(key));
     }
-    else if (key === 'length' && isArray(target)) {
-        depsMap.forEach((dep, key) => {
-            if (key === 'length' || key >= newValue) {
-                deps.push(dep);
-            }
-        });
-    }
-    else {
-        // schedule runs for SET | ADD | DELETE
-        if (key !== void 0) {
-            deps.push(depsMap.get(key));
-        }
-        // also run for iteration key on ADD | DELETE | Map.SET
-        switch (type) {
-            case "add" /* ADD */:
-                if (!isArray(target)) {
-                    deps.push(depsMap.get(ITERATE_KEY));
-                    if (isMap(target)) {
-                        deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
-                    }
-                }
-                else if (isIntegerKey(key)) {
-                    // new index added to array -> length changes
-                    deps.push(depsMap.get('length'));
-                }
-                break;
-            case "delete" /* DELETE */:
-                if (!isArray(target)) {
-                    deps.push(depsMap.get(ITERATE_KEY));
-                    if (isMap(target)) {
-                        deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
-                    }
-                }
-                break;
-            case "set" /* SET */:
-                if (isMap(target)) {
-                    deps.push(depsMap.get(ITERATE_KEY));
-                }
-                break;
+    const effects = [];
+    for (const dep of deps) {
+        if (dep) {
+            effects.push(...dep);
         }
     }
-    if (deps.length === 1) {
-        if (deps[0]) {
-            {
-                triggerEffects(deps[0]);
-            }
-        }
-    }
-    else {
-        const effects = [];
-        for (const dep of deps) {
-            if (dep) {
-                effects.push(...dep);
-            }
-        }
-        {
-            triggerEffects(createDep(effects));
-        }
-    }
+    triggerEffects(createDep(effects));
   }
 export {effect,track,trigger}

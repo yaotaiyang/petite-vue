@@ -86,7 +86,6 @@
 </div>
 <script type="module">
   import { createApp } from '../src'
-
   const STORAGE_KEY = 'todos-petite-vue'
   const todoStorage = {
     fetch() {
@@ -174,7 +173,15 @@
     },
 
     removeTodo(todo) {
-      this.todos.splice(this.todos.indexOf(todo), 1)
+      const id = todo.id;
+      for(let i=0;i<this.todos.length;i++){
+        let curTodo = this.todos[i]
+        if(curTodo.id === todo.id){
+          this.todos.splice(i,1);
+          break;
+        }
+      }
+      // this.todos.splice(this.todos.indexOf(todo), 1)
     },
 
     editTodo(todo) {

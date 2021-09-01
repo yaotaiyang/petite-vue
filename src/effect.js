@@ -104,11 +104,10 @@ export function trackEffects(dep) {
 function triggerEffects(dep, debuggerEventExtraInfo) {
     // spread into array for stabilization
     for (const effect of isArray(dep) ? dep : [...dep]) {
-        if (effect !== activeEffect || effect.allowRecurse) {
+        if (effect !== activeEffect) {
             if (effect.scheduler) {
                 effect.scheduler();
-            }
-            else {
+            } else {
                 effect.run();
             }
         }

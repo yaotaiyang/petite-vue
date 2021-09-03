@@ -1,6 +1,5 @@
 import { extend,isArray } from './utils'
 let activeEffect;
-let activeEffectScope;
 const targetMap = new WeakMap();
 const createDep = (effects) => {
     const dep = new Set(effects);
@@ -14,7 +13,6 @@ export class ReactiveEffect {
       this.scheduler = scheduler;
       this.active = true;
       this.deps = [];
-      recordEffectScope(this, scope);
       console.log("创建 ReactiveEffect 对象");
     }
     run() {
@@ -53,9 +51,7 @@ function effect(fn, options) {
   // 缺点就是不是显式的，看代码的时候并不知道有什么值
     const _effect = new ReactiveEffect(fn);
     if (options) {
-        extend(_effect, options);
-        if (options.scope)
-            recordEffectScope(_effect, options.scope);
+        extend(_effect, options); 
     }
     if (!options || !options.lazy) {
         _effect.run();
@@ -67,12 +63,12 @@ function effect(fn, options) {
     return runner;
 }
 
-function recordEffectScope(effect, scope) {
-    scope = scope || activeEffectScope;
-    if (scope && scope.active) {
-        scope.effects.push(effect);
-    }
-}
+// function recordEffectScope(effect, scope) {
+//     scope = scope || activeEffectScope;
+//     if (scope && scope.active) {
+//         scope.effects.push(effect);
+//     }
+// }
 function track(target, type, key) {
     let depsMap = targetMap.get(target);
     if (!depsMap) {

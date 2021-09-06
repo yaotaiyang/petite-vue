@@ -12,6 +12,7 @@ export const createContext = (parent) => {
     blocks: [],
     cleanups: [],
     effect: (fn) => {
+      // 如果只执行一次，直接放入队列里
       if (inOnce) {
         queueJob(fn)
         return fn 

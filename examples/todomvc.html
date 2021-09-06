@@ -214,5 +214,23 @@
     }
   }).mount('#app')
 </script>
+<script>
+  let n = 0;
+  let id ;
+  id = window.requestAnimationFrame(function(){
+    if(n>1){
+      cancelAnimationFrame(id)
+    }else{
+      console.log('animation')
+      n++
+    }
+  })
+  setTimeout(function(){
+    console.log('time-out')
+  })
+  Promise.resolve().then(function(){
+    console.log('promise')
+  })
+</script>
 
 

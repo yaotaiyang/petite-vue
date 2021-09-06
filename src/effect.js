@@ -62,13 +62,6 @@ function effect(fn, options) {
     runner.effect = _effect;
     return runner;
 }
-
-// function recordEffectScope(effect, scope) {
-//     scope = scope || activeEffectScope;
-//     if (scope && scope.active) {
-//         scope.effects.push(effect);
-//     }
-// }
 function track(target, type, key) {
     let depsMap = targetMap.get(target);
     if (!depsMap) {

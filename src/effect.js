@@ -11,8 +11,6 @@ export class ReactiveEffect {
     constructor(fn, scheduler,scope) {
       this.fn = fn;
       this.scheduler = scheduler;
-      this.active = true;
-      this.deps = [];
       console.log("创建 ReactiveEffect 对象");
     }
     run() {
